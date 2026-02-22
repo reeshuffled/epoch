@@ -37,6 +37,9 @@ const setToNowButton = document.getElementById("setToNow");
 // the time that is being counted from
 let epoch;
 
+// interval ID for updating the display
+let updateInterval;
+
 /**
  * Initialize UI components.
  */
@@ -79,7 +82,7 @@ let epoch;
         updateDisplay();
 
         // update elapsed time every second
-        setInterval(updateDisplay, 1000);
+        updateInterval = setInterval(updateDisplay, 1000);
     }
     // if the user has not defined an epoch
     else
@@ -142,6 +145,9 @@ function getEpoch() {
         // set as epoch
         epoch = new Date(epochInputEl.value);
 
+        epochDisplayEl.style.display = "";
+        epochDisplayEl.innerText = `${epoch.toLocaleString()}`;
+
         // show bars read out
         document.getElementById("bars").style.display = "";
         document.getElementById("milestones").style.display = "";
@@ -152,8 +158,9 @@ function getEpoch() {
         // update display right now so we don't have to wait a second
         updateDisplay();
 
-        // update display every second
-        setInterval(updateDisplay, 1000);
+        // clear any existing interval and start a new one
+        clearInterval(updateInterval);
+        updateInterval = setInterval(updateDisplay, 1000);
     }
 }
 
@@ -170,49 +177,69 @@ function updateDisplay() {
     const years = Math.floor(elapsed / (365 * 24 * 60 * 60));
     elapsed = elapsed - years * (365 * 24 * 60 * 60);
 
-    // hide years if there haven't been any that have elapsed
+    // show/hide years based on whether any have elapsed
     if (years === 0)
     {
         yearsSection.style.display = "none";
+    }
+    else
+    {
+        yearsSection.style.display = "";
     }
 
     // calculate months
     const months = Math.floor(elapsed / (30 * 24 * 60 * 60));
     elapsed = elapsed - months * (30 * 24 * 60 * 60);
 
-    // hide months if there haven't been any that have elapsed
+    // show/hide months based on whether any have elapsed
     if (months === 0 && years === 0)
     {
         monthsSection.style.display = "none";
+    }
+    else
+    {
+        monthsSection.style.display = "";
     }
 
     // calculate days
     const days = Math.floor(elapsed / (24 * 60 * 60));
     elapsed = elapsed - days * (24 * 60 * 60);
 
-    // hide days if there haven't been any that have elapsed
+    // show/hide days based on whether any have elapsed
     if (days === 0 && months === 0)
     {
         daysSection.style.display = "none";
+    }
+    else
+    {
+        daysSection.style.display = "";
     }
 
     // calculate hours
     const hours = Math.floor(elapsed / (60 * 60));    
     elapsed = elapsed - hours * (60 * 60);
 
-    // hide hours if there haven't been any that have elapsed
+    // show/hide hours based on whether any have elapsed
     if (hours === 0 && days === 0)
     {
         hoursSection.style.display = "none";
+    }
+    else
+    {
+        hoursSection.style.display = "";
     }
 
     // calculate minutes
     const minutes = Math.floor(elapsed / 60);
 
-    // hide minutes if there haven't been any that have elapsed
+    // show/hide minutes based on whether any have elapsed
     if (minutes === 0 && hours === 0)
     {
         minutesSection.style.display = "none";
+    }
+    else
+    {
+        minutesSection.style.display = "";
     }
 
     // calculate seconds
@@ -273,20 +300,13 @@ function calculateMilestones(days) {
             lastMilestone = "N/A";
             nextMilestone = "1 month";
         }
-        else if (totalMonths > 0)
+        else
         {
             // Counting up from past epoch
             const last = Math.floor(totalMonths / 1) * 1;
             const next = Math.ceil(totalMonths / 1) * 1;
             
             lastMilestone = `${last} ${last == 1 ? "month" : "months"}`;
-            nextMilestone = `${next} ${next == 1 ? "month" : "months"}`;
-        }
-        else
-        {
-            // Counting down to future epoch
-            const next = Math.ceil(Math.abs(totalMonths));
-            lastMilestone = "N/A";
             nextMilestone = `${next} ${next == 1 ? "month" : "months"}`;
         }
     }
