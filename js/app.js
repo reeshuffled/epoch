@@ -137,7 +137,7 @@ function getEpoch() {
     // bind to submit button
     document.getElementById("saveDatetime").onclick = () => {
         // save date time
-        localStorage.setItem(SAVE_LOCATION, document.getElementById("userInput").value);
+        localStorage.setItem(SAVE_LOCATION, epochInputEl.value);
 
         // set as epoch
         epoch = new Date(epochInputEl.value);
@@ -234,12 +234,61 @@ function updateDisplay() {
     minutesDisplay.innerText = `${minutes} ${minutes == 1 ? "minute" : "minutes"}`;
     secondsDisplay.innerText = `${seconds} ${seconds == 1 ? "second" : "seconds"}`;
 
-    // calculate last and next milestones
+    // calculate and update milestones
+    const milestones = calculateMilestones(days);
+    lastMilestoneEl.innerHTML = milestones.lastMilestone;
+    nextMilestoneEl.innerHTML = milestones.nextMilestone;
+}
+
+/**
+ * Calculate milestone milestones (last and next).
+ * @param {number} days - The number of days elapsed/remaining
+ * @param {number} now - The current time in milliseconds
+ * @returns {Object} Object with lastMilestone and nextMilestone properties
+ */
+function calculateMilestones(days) {
+    const now = new Date().getTime();
+
     let lastMilestone = "", nextMilestone = "";
+    
+    // get the total days (elapsed or remaining)
+    const totalDays = Math.floor((now - epoch) / (1000 * 24 * 60 * 60));
+    
+    // check if epoch is more than a month away (in future)
+    const useMonthlyMilestones = totalDays > 30;
+    
+    // first milestone is one day, so if there are no days elapsed or remaining, show that milestone
     if (days === 0)
     {
         lastMilestone = "N/A";
         nextMilestone = "1 day";
+    }
+    else if (useMonthlyMilestones)
+    {
+        // Use monthly milestones when epoch is more than a month away
+        const totalMonths = Math.round(totalDays / 30);
+        
+        if (totalMonths === 0)
+        {
+            lastMilestone = "N/A";
+            nextMilestone = "1 month";
+        }
+        else if (totalMonths > 0)
+        {
+            // Counting up from past epoch
+            const last = Math.floor(totalMonths / 1) * 1;
+            const next = Math.ceil(totalMonths / 1) * 1;
+            
+            lastMilestone = `${last} ${last == 1 ? "month" : "months"}`;
+            nextMilestone = `${next} ${next == 1 ? "month" : "months"}`;
+        }
+        else
+        {
+            // Counting down to future epoch
+            const next = Math.ceil(Math.abs(totalMonths));
+            lastMilestone = "N/A";
+            nextMilestone = `${next} ${next == 1 ? "month" : "months"}`;
+        }
     }
     else
     {
@@ -280,10 +329,8 @@ function updateDisplay() {
             nextMilestone = `${next} days`;
         }
     }
-
-    // update milestone displays
-    lastMilestoneEl.innerHTML = lastMilestone;
-    nextMilestoneEl.innerHTML = nextMilestone;
+    
+    return { lastMilestone, nextMilestone };
 }
 
 /**
