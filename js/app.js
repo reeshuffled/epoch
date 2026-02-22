@@ -28,6 +28,8 @@ const nextMilestoneEl = document.getElementById("nextMilestone");
 
 const epochInputEl = document.getElementById("userInput");
 
+const epochDisplayEl = document.getElementById("epoch");
+
 const setEpochButton = document.getElementById("setEpoch");
 const shareEpochButton = document.getElementById("shareEpoch");
 const setToNowButton = document.getElementById("setToNow");
@@ -69,6 +71,9 @@ let epoch;
     {
         // convert epoch string to date object
         epoch = new Date(epoch);
+
+        epochDisplayEl.style.display = "";
+        epochDisplayEl.innerText = `${epoch.toLocaleString()}`;
 
         // calculate elapsed time
         updateDisplay();
